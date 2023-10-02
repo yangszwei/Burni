@@ -1,4 +1,4 @@
-const config = require('../../config').pluginsConfig;
+const { oauth2: config } = require('../../config').pluginsConfig;
 
 /**
  * Verify the access token against the OIDC server.
@@ -20,6 +20,10 @@ const verifyToken = async (accessToken) => {
         if (!response.ok) {
             return false;
         }
+
+        const token = await response.json();
+
+        return token.active;
     } catch (e) {
         console.error("Failed to verify token: " + e);
         return false;
@@ -32,7 +36,7 @@ const verifyToken = async (accessToken) => {
 module.exports = async (req, res, next) => {
     const accessToken = req.header('Authorization').replace(/Bearer /, '');
     if (!await verifyToken(accessToken)) {
-        return false;
+        return res.status(401).send();
     }
 
     await next();
