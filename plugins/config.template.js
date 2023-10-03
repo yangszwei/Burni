@@ -17,6 +17,16 @@ module.exports.pluginsConfig = {
             secretKey: ""
         }
     },
+    oauth2: {
+        enable: false,
+        before: true,
+        server: {
+            url: "",
+            realm: "",
+            clientId: "",
+            clientSecret: ""
+        }
+    },
     checkReference: {
         enable: true,
         before: true
