@@ -1,4 +1,5 @@
 const { oauth2: config } = require('../../config').pluginsConfig;
+const fetch = require('node-fetch');
 
 /**
  * Verify the access token against the OIDC server.
@@ -10,13 +11,18 @@ const verifyToken = async (accessToken) => {
     const url = new URL(config.server.url);
     url.pathname = `/realms/${config.server.realm}/protocol/openid-connect/token/introspect`;
 
-    const data = new FormData();
-    data.append('client_id', config.server.clientId);
-    data.append('client_secret', config.server.clientSecret);
-    data.append('token', accessToken);
+    const data = {
+        client_id: config.server.clientId,
+        client_secret: config.server.clientSecret,
+        token: accessToken
+    }
 
     try {
-        const response = await fetch(url, { method: 'POST', body: data });
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(data)
+        });
         if (!response.ok) {
             return false;
         }
@@ -34,10 +40,15 @@ const verifyToken = async (accessToken) => {
  * @type {import("express").RequestHandler}
  */
 module.exports = async (req, res, next) => {
-    const accessToken = req.header('Authorization').replace(/Bearer /, '');
+    if (!req.path.startsWith('/api')) {
+        next();
+        return;
+    }
+
+    const accessToken = req.header('Authorization')?.replace(/Bearer /, '') ?? '';
     if (!await verifyToken(accessToken)) {
         return res.status(401).send();
     }
 
-    await next();
+    next();
 };
