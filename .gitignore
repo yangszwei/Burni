@@ -1,5 +1,7 @@
+.idea/
 .vscode/
 node_modules/
+.DS_Store
 
 models/mongodb/FHIRTypeSchema/*
 !models/mongodb/FHIRTypeSchema/Bundle.js
@@ -31,6 +33,9 @@ docs/apidoc/apidoc-sources
 #ignore log files
 /log
 /pm2log
+
+# ignore data
+mongodb
 
 /utils/validator/igs/*
 
